@@ -2,6 +2,10 @@
 
 本系列教程均基于正点原子 `L475` 潘多拉开发板为硬件平台。项目开源地址 [github 地址](https://github.com/tyustli/threadx-l475)
 
+[threadx 移植(一)-CubeIDE 新建 LED 闪烁工程](https://blog.csdn.net/tyustli/article/details/108372510)
+
+[threadx 移植(二)-基于 CubeIDE 移植 threadx](https://blog.csdn.net/tyustli/article/details/108373791)
+
 ### 选择工作空间
 
 ![new-project](./figures/new-project.png)

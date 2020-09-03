@@ -56,12 +56,45 @@ static void MX_GPIO_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+#include "tx_api.h"
+
+TX_THREAD               		demo_thread;
+#define DEMO_STACK_SIZE         1024
+static uint8_t thread_stack[DEMO_STACK_SIZE];
+
+void demo_thread_entry(ULONG thread_input)
+{
+    /* This thread simply sits in while-forever-sleep loop.  */
+    while(1)
+    {
+		HAL_GPIO_WritePin(GPIOE, GPIO_PIN_7, GPIO_PIN_RESET);
+		tx_thread_sleep(1000);
+		HAL_GPIO_WritePin(GPIOE, GPIO_PIN_7, GPIO_PIN_SET);
+		tx_thread_sleep(1000);
+    }
+}
+void tx_application_define(void *first_unused_memory)
+{
+    /* Create the main thread.  */
+    tx_thread_create(&demo_thread,
+					 "demo thread",
+					 demo_thread_entry,
+					 0,
+					 thread_stack,
+					 DEMO_STACK_SIZE,
+					 1,
+					 1,
+					 TX_NO_TIME_SLICE,
+					 TX_AUTO_START);
+}
 /* USER CODE END 0 */
 
 /**
   * @brief  The application entry point.
   * @retval int
   */
+
+
 int main(void)
 {
   /* USER CODE BEGIN 1 */
@@ -87,6 +120,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
+  tx_kernel_enter();
 
   /* USER CODE END 2 */
 
@@ -95,10 +129,7 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-	  HAL_GPIO_WritePin(GPIOE, GPIO_PIN_7, GPIO_PIN_RESET);
-	  HAL_Delay(1000);
-	  HAL_GPIO_WritePin(GPIOE, GPIO_PIN_7, GPIO_PIN_SET);
-	  HAL_Delay(1000);
+
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
