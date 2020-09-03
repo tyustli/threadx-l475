@@ -32,7 +32,17 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include<stdio.h>
+extern char debug_buf[128];
+extern UART_HandleTypeDef huart1;
+#define debug(...){ \
+    int len = 0; \
+    len = snprintf(debug_buf, 128, __VA_ARGS__); \
+    if (len > 0) \
+    { \
+        HAL_UART_Transmit(&huart1, (uint8_t *)debug_buf, len, HAL_MAX_DELAY);\
+    } \
+}
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/

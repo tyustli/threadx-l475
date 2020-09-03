@@ -6,6 +6,8 @@
 
 [threadx 移植(二)-基于 CubeIDE 移植 threadx](https://blog.csdn.net/tyustli/article/details/108373791)
 
+[threadx 移植(三)-添加串口打印功能](https://blog.csdn.net/tyustli/article/details/108380441)
+
 ### 选择工作空间
 
 ![new-project](./figures/new-project.png)

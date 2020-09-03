@@ -41,28 +41,36 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
+
+/* USER CODE BEGIN 1 */
+
+/* USER CODE END 1 */
 
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
 #include "tx_api.h"
+char debug_buf[128];
 
-TX_THREAD               		demo_thread;
-#define DEMO_STACK_SIZE         1024
-static uint8_t thread_stack[DEMO_STACK_SIZE];
+TX_THREAD               		led_thread;
+TX_THREAD               		printf_thread;
+#define DEMO_STACK_SIZE         4096
+static uint8_t led_thread_stack[DEMO_STACK_SIZE];
+static uint8_t printf_thread_stack[DEMO_STACK_SIZE];
 
-void demo_thread_entry(ULONG thread_input)
+void led_thread_entry(ULONG thread_input)
 {
     /* This thread simply sits in while-forever-sleep loop.  */
     while(1)
@@ -73,17 +81,38 @@ void demo_thread_entry(ULONG thread_input)
 		tx_thread_sleep(1000);
     }
 }
+
+void printf_thread_entry(ULONG thread_input)
+{
+    while(1)
+    {
+    	debug("hello tyustli\r\n");
+    	tx_thread_sleep(1000);
+    }
+}
 void tx_application_define(void *first_unused_memory)
 {
-    /* Create the main thread.  */
-    tx_thread_create(&demo_thread,
-					 "demo thread",
-					 demo_thread_entry,
+    /* Create the led thread.  */
+    tx_thread_create(&led_thread,
+					 "led thread",
+					 led_thread_entry,
 					 0,
-					 thread_stack,
+					 led_thread_stack,
 					 DEMO_STACK_SIZE,
 					 1,
 					 1,
+					 TX_NO_TIME_SLICE,
+					 TX_AUTO_START);
+
+    /* Create the printf thread.  */
+    tx_thread_create(&printf_thread,
+					 "printf thread",
+					 printf_thread_entry,
+					 0,
+					 printf_thread_stack,
+					 DEMO_STACK_SIZE,
+					 2,
+					 2,
 					 TX_NO_TIME_SLICE,
 					 TX_AUTO_START);
 }
@@ -93,8 +122,6 @@ void tx_application_define(void *first_unused_memory)
   * @brief  The application entry point.
   * @retval int
   */
-
-
 int main(void)
 {
   /* USER CODE BEGIN 1 */
@@ -119,6 +146,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
   tx_kernel_enter();
 
@@ -143,6 +171,7 @@ void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+  RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
 
   /** Initializes the CPU, AHB and APB busses clocks 
   */
@@ -174,12 +203,53 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART1;
+  PeriphClkInit.Usart1ClockSelection = RCC_USART1CLKSOURCE_PCLK2;
+  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
+  {
+    Error_Handler();
+  }
   /** Configure the main internal regulator output voltage 
   */
   if (HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1) != HAL_OK)
   {
     Error_Handler();
   }
+}
+
+/**
+  * @brief USART1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_USART1_UART_Init(void)
+{
+
+  /* USER CODE BEGIN USART1_Init 0 */
+
+  /* USER CODE END USART1_Init 0 */
+
+  /* USER CODE BEGIN USART1_Init 1 */
+
+  /* USER CODE END USART1_Init 1 */
+  huart1.Instance = USART1;
+  huart1.Init.BaudRate = 115200;
+  huart1.Init.WordLength = UART_WORDLENGTH_8B;
+  huart1.Init.StopBits = UART_STOPBITS_1;
+  huart1.Init.Parity = UART_PARITY_NONE;
+  huart1.Init.Mode = UART_MODE_TX_RX;
+  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
+  huart1.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
+  huart1.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+  if (HAL_UART_Init(&huart1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USART1_Init 2 */
+
+  /* USER CODE END USART1_Init 2 */
+
 }
 
 /**
